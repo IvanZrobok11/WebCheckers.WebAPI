@@ -1,0 +1,8 @@
+.vs/
+bin/
+obj/
+obj/Debug
+*.user
+logs/
+.idea/
+packages/
