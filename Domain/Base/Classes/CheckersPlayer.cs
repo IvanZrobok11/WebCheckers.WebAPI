@@ -1,16 +1,16 @@
 ﻿using Domain.Base.Enums;
 
-namespace Domain.Base.Struct
+namespace Domain.Base.Classes
 {
-    public struct CheckersPlayer
+    public class CheckersPlayer
     {
         public CheckersPlayer(int id, CellColour checkerColour)
         {
             Id = id;
-            CheckerColour = checkerColour;
+            Colour = checkerColour;
         }
         public int Id { get; private set; }
-        public CellColour CheckerColour { get; set; }
+        public CellColour Colour { get; set; }
     }
 
 }

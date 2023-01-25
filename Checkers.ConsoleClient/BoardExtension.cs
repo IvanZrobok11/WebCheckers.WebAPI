@@ -12,7 +12,7 @@ namespace Checkers.ConsoleClient
                 if (board.GetCellByIndex(height, width).Colour == CellColour.White)
                 {
                     Console.BackgroundColor = ConsoleColor.White;
-                    Console.Write(" ");
+                    Console.Write("  ");
                 }
                 else if (board.GetCellByIndex(height, width).Colour == CellColour.Black)
                 {
@@ -28,11 +28,11 @@ namespace Checkers.ConsoleClient
                         {
                             Console.ForegroundColor = ConsoleColor.White;
                         }
-                        Console.Write("*");
+                        Console.Write("@ ");
                     }
                     else
                     {
-                        Console.Write(" ");
+                        Console.Write("  ");
                     }
                 }
                 Console.ResetColor();
@@ -59,7 +59,7 @@ namespace Checkers.ConsoleClient
             },
             (height) =>
             {
-                if (height == 3)
+                if (height == 4)
                 {
                     Console.Write("\n" + new string('-', 16));
                 }

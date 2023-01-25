@@ -19,7 +19,7 @@ namespace Domain.Base.Classes
 
             MovablePlayerId = this.player1.Id;
         }
-        public void MakeMove(int playerId, BoardLocation with, int moveId)
+        public void MakeMove(int playerId, CheckerLocation with, int moveId)
         {
             var player = GetPlayer(playerId);
             if (!IsMovable(player))
@@ -58,32 +58,38 @@ namespace Domain.Base.Classes
             {
                 if (cell == start)
                 {
-                    _board.GetCell(new BoardLocation(cell.Width, cell.Height)).UpdateCell(CellPlace.Empty);
+                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(CellPlace.Empty);
                 }
                 if (!cell.Checker.SameFiguresColor(start.Checker))
                 {
-                    _board.GetCell(new BoardLocation(cell.Width, cell.Height)).UpdateCell(CellPlace.Empty);
-                    beateds.Add(_board.GetCell(new BoardLocation(cell.Width, cell.Height)));
+                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(CellPlace.Empty);
+                    beateds.Add(_board.GetCell(new CheckerLocation(cell.Width, cell.Height)));
                 }
                 if (cell == end)
                 {
-                    _board.GetCell(new BoardLocation(cell.Width, cell.Height)).UpdateCell(start.Checker);
+                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(start.Checker);
                 }
                 if (Board.OnEndLine(cell))
                 {
-                    _board.GetCell(new BoardLocation(cell.Width, cell.Height)).UpdateCell(start.Checker.ToQueen());
+                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(start.Checker.ToQueen());
                 }
             }
+        }
+        public IEnumerable<Move> GetAllAvailableCheckerMoves(CheckerLocation location)
+        {
+            var cell = _board.GetCell(location);
+            return GetAllAvailableCheckerMoves(cell);
         }
 
         public IEnumerable<Move> GetAllAvailableCheckerMoves(Cell start)
         {
-            var paths = GetAllAvailableCheckerPaths(start);
-            return paths.Select(path => new Move(path));
+            var pathes = GetAvailableCheckerPaths(start);
+            return pathes.Select(path => new Move(path));
         }
-        public List<LinkedList<Cell>> GetAllAvailableCheckerPaths(Cell start)
+
+        private List<LinkedList<Cell>> GetAvailableCheckerPaths(Cell start)
         {
-            var list = new List<LinkedList<Cell>>();
+            var pathes = new List<LinkedList<Cell>>();
 
             bool startIsQueen = start.Checker.IsQueen();
 
@@ -104,23 +110,24 @@ namespace Domain.Base.Classes
 
                 foreach (var adj in adjCells)
                 {
-                    var last = list.FirstOrDefault(x => x.Last.Value.Equals(node));
+                    var last = pathes.FirstOrDefault(x => x.Last.Value.Equals(node));
                     if (last == null)
                     {
-                        var llist = new LinkedList<Cell>();
-                        llist.AddFirst(node);
-                        last = llist;
+                        var path = new LinkedList<Cell>();
+                        path.AddFirst(node);
+                        pathes.Add(path);
+                        last = path;
                     }
 
                     last.AddLast(adj);
                 }
             }
 
-            return list;
+            return pathes;
         }
 
         //TODO:
-        private List<List<Cell>> GetAllCheckerPaths(Cell start)
+        private List<List<Cell>> GetAvailableCheckerPaths_Old(Cell start)
         {
             if (start.Checker == CellPlace.Empty)
             {

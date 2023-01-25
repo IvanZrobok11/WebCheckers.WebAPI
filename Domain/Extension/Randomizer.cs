@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Extension
+﻿namespace Domain.Extension
 {
     public class Randomizer
     {
         private static Random random = new Random();
-        public static int RandomFromArray(params int[] arr)
+        public static T RandomFromArray<T>(params T[] arr)
         {
-            return random.Next(arr.Length);
+            var index = random.Next(arr.Length);
+            return arr[index];
         }
     }
 }

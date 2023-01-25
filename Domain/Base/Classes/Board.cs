@@ -8,12 +8,13 @@ namespace Domain.Base.Classes
     {
         public const int INDEX_ASCII_FOR_FIRST_CAPITAL_LETTTER = 65;
         public const bool WHITE_IS_DOWN = true;
+        public static int BoardLenght { get; } = 8;
 
         internal readonly Cell[,] fields;
 
         public Board()
         {
-            fields = new Cell[8, 8];
+            fields = new Cell[BoardLenght, BoardLenght];
             FillField();
             ArrangeCheckers();
         }
@@ -24,9 +25,9 @@ namespace Domain.Base.Classes
 
         public Board Copy()
         {
-            var fields = new Cell[8, 8];
-            Array.Copy(this.fields, this.fields, fields.Length);
-            var copy = new Board(fields);
+            var copyFields = new Cell[8, 8];
+            Array.Copy(this.fields, copyFields, copyFields.Length);
+            var copy = new Board(copyFields);
             return copy;
         }
 
@@ -78,23 +79,29 @@ namespace Domain.Base.Classes
             });
         }
 
-
-        public bool TryGetCell(BoardLocation location, out Cell? cell)
-           => TryGetCell(location.Width, location.Height, out cell);
-        public bool TryGetCell(char width, int height, out Cell? cell)
+        public static bool ValidateCoordinate(char width, int height)
         {
             var indexHeight = HeightToIndex(height);
             var indexWidth = WidthToIndex(width);
-            if (indexHeight >= fields.GetLength(0) || indexHeight < 0 || indexWidth >= fields.GetLength(1) || indexWidth < 0)
+            return indexHeight < BoardLenght && indexHeight >= 0 && indexWidth < BoardLenght && indexWidth >= 0;
+        }
+
+        public bool TryGetCell(CheckerLocation location, out Cell? cell)
+           => TryGetCell(location.Width, location.Height, out cell);
+        public bool TryGetCell(char width, int height, out Cell? cell)
+        {
+            if (!ValidateCoordinate(width, height))
             {
-                cell = default;
+                cell = null;
                 return false;
             }
+            var indexHeight = HeightToIndex(height);
+            var indexWidth = WidthToIndex(width);
             cell = GetCellByIndex(indexHeight, indexWidth);
             return true;
         }
 
-        public Cell GetCell(BoardLocation location)
+        public Cell GetCell(CheckerLocation location)
             => GetCell(location.Width, location.Height);
         public Cell GetCell(char width, int height)
         {
@@ -117,9 +124,9 @@ namespace Domain.Base.Classes
         {
             var accrossCells = new List<Cell>(4);
             Cell? nextCell;
-            if (TryGetCell((char)(cell.Width + 1), cell.Height + 1, out nextCell))
-                accrossCells.Add(nextCell!.Value);
             if (TryGetCell((char)(cell.Width - 1), cell.Height + 1, out nextCell))
+                accrossCells.Add(nextCell!.Value);
+            if (TryGetCell((char)(cell.Width + 1), cell.Height + 1, out nextCell))
                 accrossCells.Add(nextCell!.Value);
             if (TryGetCell((char)(cell.Width + 1), cell.Height - 1, out nextCell))
                 accrossCells.Add(nextCell!.Value);
@@ -149,14 +156,8 @@ namespace Domain.Base.Classes
                 throw new ArgumentException($"Cell with checker {cell.Checker} cannot be on end line!");
             }
         }
-        // public int Get
-        /// <summary>
-        /// TODO
-        /// </summary>
-        /// <param name="with"></param>
-        /// <param name="to"></param>
-        /// <returns></returns>
-        //private bool CheckerCanMove(Cell with, Cell to)
+
+        //public bool CheckerCanMove(Cell cell)
         //{
         //    if (GetCell(to.Width, to.Height).Checker != CellPlace.Empty)
         //    {

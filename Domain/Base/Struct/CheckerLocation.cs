@@ -1,10 +1,10 @@
 ﻿namespace Domain.Base.Struct
 {
-    public struct BoardLocation
+    public struct CheckerLocation
     {
-        public BoardLocation() { }
+        public CheckerLocation() { }
 
-        public BoardLocation(char width, int height)
+        public CheckerLocation(char width, int height)
         {
             Width = width;
             Height = height;
