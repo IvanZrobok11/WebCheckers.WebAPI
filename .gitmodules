@@ -1,0 +1,3 @@
+[submodule "WebCheckers.Common"]
+	path = WebCheckers.Common
+	url = https://github.com/IvanZrobok11/WebCheckers.Common.git

@@ -13,7 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C7AFB4D1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Checkers.UnitTests", "Checkers.UnitTests\Checkers.UnitTests.csproj", "{A7DA3BB1-1184-464F-86FB-2D97F2D1CF60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkers.ConsoleClient", "Checkers.ConsoleClient\Checkers.ConsoleClient.csproj", "{944A52DC-BD1C-4917-BB8E-D006EA4B1B94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Checkers.ConsoleClient", "Checkers.ConsoleClient\Checkers.ConsoleClient.csproj", "{944A52DC-BD1C-4917-BB8E-D006EA4B1B94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{9A0903B4-6377-40E7-8D0A-D487B96E03CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{944A52DC-BD1C-4917-BB8E-D006EA4B1B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{944A52DC-BD1C-4917-BB8E-D006EA4B1B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{944A52DC-BD1C-4917-BB8E-D006EA4B1B94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A0903B4-6377-40E7-8D0A-D487B96E03CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A0903B4-6377-40E7-8D0A-D487B96E03CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A0903B4-6377-40E7-8D0A-D487B96E03CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A0903B4-6377-40E7-8D0A-D487B96E03CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
