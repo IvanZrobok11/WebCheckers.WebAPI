@@ -5,7 +5,7 @@ namespace Domain.Base.Classes
 {
     public class Bot : CheckersPlayer
     {
-        public Bot(int id, CellColour checkerColour) : base(id, checkerColour)
+        public Bot(int id, CellColor checkerColor) : base(id, checkerColor)
         {
         }
 

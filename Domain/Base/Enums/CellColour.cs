@@ -1,6 +1,6 @@
 ﻿namespace Domain.Base.Enums
 {
-    public enum CellColour
+    public enum CellColor
     {
         White,
         Black,

@@ -6,15 +6,15 @@ namespace Domain.Base.Classes
 {
     public class Board
     {
-        public const int INDEX_ASCII_FOR_FIRST_CAPITAL_LETTTER = 65;
+        public const int INDEX_ASCII_FOR_FIRST_CAPITAL_LETTER = 65;
         public const bool WHITE_IS_DOWN = true;
-        public static int BoardLenght { get; } = 8;
+        public static int BoardLength { get; } = 8;
 
         internal readonly Cell[,] fields;
 
         public Board()
         {
-            fields = new Cell[BoardLenght, BoardLenght];
+            fields = new Cell[BoardLength, BoardLength];
             FillField();
             ArrangeCheckers();
         }
@@ -60,9 +60,9 @@ namespace Domain.Base.Classes
         {
             TraversalField((height, width) =>
             {
-                var colour = (height + width) % 2 == 0 ? CellColour.Black : CellColour.White;
+                var color = (height + width) % 2 == 0 ? CellColor.Black : CellColor.White;
                 var widthChar = IndexToWidth(width);
-                fields[height, width] = new Cell(colour, CellPlace.Empty, widthChar, IndexToHeight(height));
+                fields[height, width] = new Cell(color, CellPlace.Empty, widthChar, IndexToHeight(height));
             });
         }
         private void ArrangeCheckers()
@@ -70,7 +70,7 @@ namespace Domain.Base.Classes
             TraversalField((height, width) =>
             {
                 var cell = fields[height, width];
-                if (cell.Colour == CellColour.White) return;
+                if (cell.Color == CellColor.White) return;
 
                 if (height < 3)
                     fields[height, width].UpdateCell(CellPlace.WhiteChecker);
@@ -83,7 +83,7 @@ namespace Domain.Base.Classes
         {
             var indexHeight = HeightToIndex(height);
             var indexWidth = WidthToIndex(width);
-            return indexHeight < BoardLenght && indexHeight >= 0 && indexWidth < BoardLenght && indexWidth >= 0;
+            return indexHeight < BoardLength && indexHeight >= 0 && indexWidth < BoardLength && indexWidth >= 0;
         }
 
         public bool TryGetCell(CheckerLocation location, out Cell? cell)
@@ -101,44 +101,51 @@ namespace Domain.Base.Classes
             return true;
         }
 
+        public void UpdateCell(char width, int height, CellPlace cellPlace)
+        {
+            UpdateCell(new CheckerLocation(width, height), cellPlace);
+        }
+        public void UpdateCell(CheckerLocation location, CellPlace cellPlace)
+        {
+            var indexHeight = HeightToIndex(location.Height);
+            var indexWidth = WidthToIndex(location.Width);
+            fields[indexHeight, indexWidth].UpdateCell(cellPlace);
+        }
         public Cell GetCell(CheckerLocation location)
             => GetCell(location.Width, location.Height);
         public Cell GetCell(char width, int height)
         {
             if (!TryGetCell(width, height, out Cell? cell))
-                throw new ArgumentException(string.Format("This impossible find cell with coordinate: height [{0}] or width [{1}] value", height, width));
+                throw new ArgumentException(string.Format("This impossible find cell with coordinate: width [{0}] and height [{1}] value", width, height));
             return cell!.Value;
         }
         public Cell GetCellByIndex(int height, int width) => fields[height, width];
 
         private static int HeightToIndex(int height) => height - 1;
-        private static int WidthToIndex(char width) => (int)width - INDEX_ASCII_FOR_FIRST_CAPITAL_LETTTER;
-        private static char IndexToWidth(int index) => (char)(index + INDEX_ASCII_FOR_FIRST_CAPITAL_LETTTER);
+        private static int WidthToIndex(char width) => (int)width - INDEX_ASCII_FOR_FIRST_CAPITAL_LETTER;
+        private static char IndexToWidth(int index) => (char)(index + INDEX_ASCII_FOR_FIRST_CAPITAL_LETTER);
         private static int IndexToHeight(int height) => height + 1;
 
 
         /// <summary>
         /// returns all incident nodes(cells)
         /// </summary>
-        internal List<Cell> GetAllAdjacentAccrossCells(Cell cell)
+        internal IEnumerable<Cell> GetAllAdjacentAcrossCells(Cell cell)
         {
-            var accrossCells = new List<Cell>(4);
             Cell? nextCell;
             if (TryGetCell((char)(cell.Width - 1), cell.Height + 1, out nextCell))
-                accrossCells.Add(nextCell!.Value);
+                yield return nextCell!.Value;
             if (TryGetCell((char)(cell.Width + 1), cell.Height + 1, out nextCell))
-                accrossCells.Add(nextCell!.Value);
+                yield return nextCell!.Value;
             if (TryGetCell((char)(cell.Width + 1), cell.Height - 1, out nextCell))
-                accrossCells.Add(nextCell!.Value);
+                yield return nextCell!.Value;
             if (TryGetCell((char)(cell.Width - 1), cell.Height - 1, out nextCell))
-                accrossCells.Add(nextCell!.Value);
-
-            return accrossCells;
+                yield return nextCell!.Value;
         }
 
-        public static bool OnSameDiagonale(Cell cell1, Cell cell2)
-            => OnSameDiagonale(WidthToIndex(cell1.Width), HeightToIndex(cell1.Height), WidthToIndex(cell2.Width), HeightToIndex(cell2.Height));
-        private static bool OnSameDiagonale(int width1, int height1, int width2, int height2)
+        public static bool OnSameDiagonal(Cell cell1, Cell cell2)
+            => OnSameDiagonal(WidthToIndex(cell1.Width), HeightToIndex(cell1.Height), WidthToIndex(cell2.Width), HeightToIndex(cell2.Height));
+        private static bool OnSameDiagonal(int width1, int height1, int width2, int height2)
             => width1.GetBiggest(height1) - width1.GetLower(height1) == width2.GetBiggest(height2) - width2.GetLower(height2);
 
         public static bool OnEndLine(Cell cell)
@@ -156,21 +163,5 @@ namespace Domain.Base.Classes
                 throw new ArgumentException($"Cell with checker {cell.Checker} cannot be on end line!");
             }
         }
-
-        //public bool CheckerCanMove(Cell cell)
-        //{
-        //    if (GetCell(to.Width, to.Height).Checker != CellPlace.Empty)
-        //    {
-        //        return false;
-        //    }
-        //    if (!MoveIsForward(with, to) && with.Checker != Queen)
-        //    {
-        //        return false;
-        //    }
-
-        //    //TODO:
-
-        //    return true;
-        //}
     }
 }

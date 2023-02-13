@@ -6,10 +6,12 @@ namespace Domain.Base.Classes
 {
     public class Game
     {
-        internal Board _board;
+        protected Board _board;
         private readonly CheckersPlayer player1;
         private readonly CheckersPlayer player2;
-        public int MovablePlayerId { get; }
+        public CellColor Movable { get; private set; }
+        public int MovablePlayerId { get; private set; }
+        private bool IsGameStarted;
         public bool IsGameOver = false;
         public Game(CheckersPlayer player1, CheckersPlayer player2)
         {
@@ -17,8 +19,15 @@ namespace Domain.Base.Classes
             this.player1 = player1;
             this.player2 = player2;
 
-            MovablePlayerId = this.player1.Id;
+            if (player1.Color == player2.Color)
+            {
+                throw new Exception("Players has the same color");
+            }
+
+            MovablePlayerId = player1.Color == CellColor.White ? player1.Id : player2.Id;
         }
+
+
         public void MakeMove(int playerId, CheckerLocation with, int moveId)
         {
             var player = GetPlayer(playerId);
@@ -45,7 +54,7 @@ namespace Domain.Base.Classes
 
         private void MakeMove(Move move)
         {
-            var beateds = new List<Cell>();
+            var beatens = new List<Cell>();
             var start = move.Path.First();
             var end = move.Path.Last();
 
@@ -53,25 +62,31 @@ namespace Domain.Base.Classes
             {
                 throw new Exception("Invalid path! Ended cell must be empty!");
             }
-
+            bool lastMoveWasBeating = false;
             foreach (var cell in move.Path)
             {
-                if (cell == start)
+                if (cell.LocationEquels(start))
                 {
-                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(CellPlace.Empty);
+                    _board.UpdateCell(new CheckerLocation(cell.Width, cell.Height), CellPlace.Empty);
+                    continue;
                 }
-                if (!cell.Checker.SameFiguresColor(start.Checker))
+                else if (cell.LocationEquels(end))
                 {
-                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(CellPlace.Empty);
-                    beateds.Add(_board.GetCell(new CheckerLocation(cell.Width, cell.Height)));
+                    _board.UpdateCell(new CheckerLocation(cell.Width, cell.Height), start.Checker);
+                    break;
                 }
-                if (cell == end)
+                else if (!cell.Checker.SameFiguresColor(start.Checker))
                 {
-                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(start.Checker);
+                    _board.UpdateCell(new CheckerLocation(cell.Width, cell.Height), CellPlace.Empty);
+                    beatens.Add(_board.GetCell(new CheckerLocation(cell.Width, cell.Height)));
                 }
-                if (Board.OnEndLine(cell))
+                else if (lastMoveWasBeating)
                 {
-                    _board.GetCell(new CheckerLocation(cell.Width, cell.Height)).UpdateCell(start.Checker.ToQueen());
+                    _board.UpdateCell(new CheckerLocation(cell.Width, cell.Height), start.Checker);
+                    if (Board.OnEndLine(cell))
+                    {
+                        _board.UpdateCell(new CheckerLocation(cell.Width, cell.Height), start.Checker.ToQueen());
+                    }
                 }
             }
         }
@@ -83,13 +98,13 @@ namespace Domain.Base.Classes
 
         public IEnumerable<Move> GetAllAvailableCheckerMoves(Cell start)
         {
-            var pathes = GetAvailableCheckerPaths(start);
-            return pathes.Select(path => new Move(path));
+            var paths = GetAvailableCheckerPaths(start);
+            return paths.Select(path => new Move(path));
         }
 
         private List<LinkedList<Cell>> GetAvailableCheckerPaths(Cell start)
         {
-            var pathes = new List<LinkedList<Cell>>();
+            var paths = new List<LinkedList<Cell>>();
 
             bool startIsQueen = start.Checker.IsQueen();
 
@@ -99,31 +114,47 @@ namespace Domain.Base.Classes
             while (queue.Count > 0)
             {
                 var node = queue.Dequeue();
-                var adjCells = _board.GetAllAdjacentAccrossCells(node)
+                var adjCells = _board.GetAllAdjacentAcrossCells(node)
                     .SkipWhere(nextNode => nextNode.Checker.SameFiguresColor(start.Checker)) // Skip all where move is blocked same color checker
                     .SkipWhere(nextNode => nextNode.Checker.SameFiguresColor(node.Checker))
 
-                    // .SkipWhere(nextNode => (MoveIsBack(start, nextNode) || !startIsQueen))
+                    .SkipWhere(nextNode => MoveIsBack(start, nextNode) && !startIsQueen)
                     .SkipWhere(nextNode => node.Checker == CellPlace.Empty && nextNode.Checker == CellPlace.Empty && !startIsQueen)
-                    .SkipWhere(nextNode => startIsQueen && !Board.OnSameDiagonale(nextNode, node))
+                    .SkipWhere(nextNode => startIsQueen && !Board.OnSameDiagonal(nextNode, node))
                     .ToList();
 
                 foreach (var adj in adjCells)
                 {
-                    var last = pathes.FirstOrDefault(x => x.Last.Value.Equals(node));
-                    if (last == null)
+                    var lastPath = paths.FirstOrDefault(x => x.Last.Value.Equals(node));
+                    if (lastPath == null)
                     {
                         var path = new LinkedList<Cell>();
                         path.AddFirst(node);
-                        pathes.Add(path);
-                        last = path;
+                        paths.Add(path);
+                        lastPath = path;
                     }
 
-                    last.AddLast(adj);
+                    if (adj.Checker == CellPlace.Empty || CanBeat(start, adj))
+                    {
+                        lastPath.AddLast(adj);
+                    }
                 }
             }
 
-            return pathes;
+            return paths;
+        }
+
+        private bool CanBeat(Cell start, Cell current)
+        {
+            if (!start.Checker.SameFiguresColor(current.Checker))
+            {
+                var nextCell = _board.GetAllAdjacentAcrossCells(current).Where(x => Board.OnSameDiagonal(start, x));
+                if (nextCell.Any() && nextCell.First().Checker == CellPlace.Empty)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         //TODO:
@@ -144,11 +175,11 @@ namespace Domain.Base.Classes
             while (queue.Count != 0)
             {
                 var node = queue.Dequeue();
-                var adjCells = _board.GetAllAdjacentAccrossCells(node)
+                var adjCells = _board.GetAllAdjacentAcrossCells(node)
                     .Where(nextNode => nextNode.Checker.SameFiguresColor(start.Checker)) // Skip all where move is blocked same color checker
                     .SkipWhere(nextNode => node.Checker.SameFiguresColor(nextNode.Checker))
-                    .SkipWhere(nextNode => (MoveIsBack(start, nextNode) || !startIsQueen))
                     .SkipWhere(nextNode => node.Checker == CellPlace.Empty && nextNode.Checker == CellPlace.Empty/* && !startIsQueen*/)
+                    .SkipWhere(nextNode => (MoveIsBack(start, nextNode) || !startIsQueen))
                     .ToList();
 
                 if (!adjCells.Any()) endPaths.Add(node);
@@ -191,15 +222,15 @@ namespace Domain.Base.Classes
             return paths;
         }
 
-        public bool MoveIsForward(Cell with, Cell to) => with.Checker switch
+        public static bool MoveIsForward(Cell with, Cell to) => with.Checker switch
         {
             CellPlace.WhiteChecker => Board.WHITE_IS_DOWN && with.Height < to.Height,
             CellPlace.WhiteQueen => Board.WHITE_IS_DOWN && with.Height < to.Height,
-            CellPlace.BlackChecker => !Board.WHITE_IS_DOWN && with.Height > to.Height,
-            CellPlace.BlackQueen => !Board.WHITE_IS_DOWN && with.Height > to.Height,
+            CellPlace.BlackChecker => Board.WHITE_IS_DOWN && with.Height > to.Height,
+            CellPlace.BlackQueen => Board.WHITE_IS_DOWN && with.Height > to.Height,
             _ => throw new ArgumentException(),
         };
-        private bool MoveIsBack(Cell with, Cell to) => !MoveIsForward(with, to);
+        public static bool MoveIsBack(Cell with, Cell to) => !MoveIsForward(with, to);
         private bool IsBeatMove(Cell with, Cell to)
         {
             var difference = with.Height - to.Height;
@@ -219,6 +250,6 @@ namespace Domain.Base.Classes
             }
             return player1.Id == playerId ? player1 : player2;
         }
-        public Board DublicateBoard => _board.Copy();
+        public Board DuplicateBoard => _board.Copy();
     }
 }

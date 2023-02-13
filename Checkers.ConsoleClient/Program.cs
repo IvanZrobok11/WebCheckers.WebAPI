@@ -5,19 +5,20 @@ using Domain.Base.Enums;
 using Domain.Base.Struct;
 using System.Text;
 
+
 while (true)
 {
     //ViewLaunchMenu();
 
-    var player = new CheckersPlayer(1, CellColour.Black);
-    var bot = new Bot(2, CellColour.White);
+    var player = new CheckersPlayer(1, CellColor.Black);
+    var bot = new Bot(2, CellColor.White);
     var game = new Game(player, bot);
 
     while (!game.IsGameOver)
     {
-        game.DublicateBoard.PrintCordinateBoard();
+        game.DuplicateBoard.PrintCordinateBoard();
         Console.WriteLine();
-        var board = game.DublicateBoard;
+        var board = game.DuplicateBoard;
         board.PrintBoard();
 
         if (game.IsMovable(player))

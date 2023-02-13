@@ -9,12 +9,12 @@ namespace Checkers.ConsoleClient
         {
             board.RevertTraversalField((height, width) =>
             {
-                if (board.GetCellByIndex(height, width).Colour == CellColour.White)
+                if (board.GetCellByIndex(height, width).Color == CellColor.White)
                 {
                     Console.BackgroundColor = ConsoleColor.White;
                     Console.Write("  ");
                 }
-                else if (board.GetCellByIndex(height, width).Colour == CellColour.Black)
+                else if (board.GetCellByIndex(height, width).Color == CellColor.Black)
                 {
                     Console.BackgroundColor = ConsoleColor.Black;
                     var checker = board.GetCellByIndex(height, width).Checker;
@@ -42,13 +42,13 @@ namespace Checkers.ConsoleClient
         {
             board.RevertTraversalField((height, width) =>
             {
-                if (board.GetCellByIndex(height, width).Colour == CellColour.White)
+                if (board.GetCellByIndex(height, width).Color == CellColor.White)
                 {
                     Console.BackgroundColor = ConsoleColor.White;
                     Console.ForegroundColor = ConsoleColor.Black;
 
                 }
-                else if (board.GetCellByIndex(height, width).Colour == CellColour.Black)
+                else if (board.GetCellByIndex(height, width).Color == CellColor.Black)
                 {
                     Console.BackgroundColor = ConsoleColor.Black;
                     Console.ForegroundColor = ConsoleColor.White;
