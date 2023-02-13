@@ -1,9 +1,10 @@
+using Common.Contract.RequestsAndResponses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -19,15 +20,16 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public ActionResult<CreateRoomRequest> Get([FromQuery] CreateRoomRequest request)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            var gameRoom = request.CreateRoom;
+            return BadRequest("Some exception");
         }
+
+        //[HttpGet(Name = "Fpp")]
+        //public ActionResult Fpp()
+        //{
+        //    return null;
+        //}
     }
 }
